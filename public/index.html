@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Work Order Board</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="description" content="TaskFlow task manager UI, served by the Express API as a single monolith." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="api-banner" class="api-banner" hidden>
+    <span class="api-banner-text" id="api-banner-text"></span>
+    <button id="api-retry" class="btn btn-mini" type="button" hidden>Retry</button>
+    <button id="api-dismiss" class="btn btn-mini" type="button">Dismiss</button>
+  </div>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <p class="eyebrow">Task management · monolith build · UI + API on one port</p>
+      <div class="masthead-row">
+        <h1 class="wordmark">TASK<span class="wordmark-accent">FLOW</span></h1>
+        <div class="api-status" id="api-status" data-state="unknown">
+          <span class="lamp" aria-hidden="true"></span>
+          <span class="api-status-label" id="api-status-label">CHECKING…</span>
+        </div>
+      </div>
+      <p class="board-meta" id="board-meta">Connecting to the API…</p>
+    </div>
+    <div class="hazard" aria-hidden="true"></div>
+  </header>
+
+  <main class="layout">
+    <section class="issue-panel" aria-labelledby="issue-heading">
+      <h2 class="panel-heading" id="issue-heading">Issue a work order</h2>
+      <form id="new-task-form" novalidate>
+        <div class="field">
+          <label class="field-label" for="new-title">Title</label>
+          <input class="field-input" id="new-title" name="title" type="text" maxlength="200"
+                 placeholder="e.g. Wire up the audit job" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="new-description">Notes <span class="optional-tag">optional</span></label>
+          <input class="field-input" id="new-description" name="description" type="text" maxlength="2000"
+                 placeholder="Anything the crew should know" autocomplete="off" />
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+        <button class="btn btn-primary" type="submit">Issue order</button>
+      </form>
+    </section>
+
+    <section class="board" aria-label="Work order board">
+      <div class="board-toolbar">
+        <div class="filters" id="filters" role="group" aria-label="Filter work orders"></div>
+      </div>
+      <ul class="task-list" id="task-list"></ul>
+      <p class="empty-state" id="empty-state" hidden></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-line">TaskFlow monolith · Express serves this page and <span class="mono">/api</span> on one port</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

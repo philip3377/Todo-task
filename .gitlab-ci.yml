@@ -1,0 +1,79 @@
+# TaskFlow API pipeline: install -> test -> security -> build.
+# Runs on branch pushes and on merge requests (no duplicate pipelines for
+# branches that already have an open merge request).
+
+stages:
+  - install
+  - test
+  - security
+  - build
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+default:
+  # Official Node.js image, Alpine variant (small download, no privileged Docker access needed).
+  image: node:24-alpine
+  interruptible: true
+  # npm download cache, keyed on package-lock.json so it resets when dependencies change.
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+
+variables:
+  npm_config_cache: '$CI_PROJECT_DIR/.npm'
+
+install:
+  stage: install
+  script:
+    # npm ci installs exactly what package-lock.json describes (reproducible installs).
+    - npm ci --prefer-offline
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 30 min
+
+lint:
+  stage: test
+  needs: ['install']
+  script:
+    - npm run lint
+
+typecheck:
+  stage: test
+  needs: ['install']
+  script:
+    - npm run typecheck
+
+test:
+  stage: test
+  needs: ['install']
+  script:
+    - npm test
+
+audit:
+  stage: security
+  needs: ['install']
+  script:
+    # Fails the pipeline on high or critical vulnerabilities.
+    - npm audit --audit-level=high
+
+build:
+  stage: build
+  needs: ['install']
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week
+
+# Security scanning (SAST, Secret Detection, Dependency Scanning) is enabled
+# separately - see the "GitLab Security Scanning" section in README.md.
