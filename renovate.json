@@ -4,7 +4,7 @@
     "config:recommended"
   ],
   "schedule": [
-    "before 2:40pm on monday"
+    "before 14:40 on monday"
   ],
   "timezone": "Asia/Yangon",
   "dependencyDashboard": true,
